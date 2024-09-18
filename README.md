@@ -2,9 +2,9 @@
 
 <p align="center">
   <img alt="Github top language" src="https://img.shields.io/github/languages/top/MohamedAbdelfattah022/Problemset-Collection?color=56BEB8">
-
+ &#xa0; 
   <img alt="Github language count" src="https://img.shields.io/github/languages/count/MohamedAbdelfattah022/Problemset-Collection?color=56BEB8">
-
+ &#xa0; 
   <img alt="Repository size" src="https://img.shields.io/github/repo-size/MohamedAbdelfattah022/Problemset-Collection?color=56BEB8">
 </p>
 
@@ -61,7 +61,27 @@ Before starting :checkered_flag:, you need to have:
 - [Git](https://git-scm.com) 
 - [Node](https://nodejs.org/en/)
 - [React](https://pt-br.reactjs.org/)
-- [MS SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+- [MS SQL Server](https://www.microsoft.com/en-us/sql-server)
 
+## :checkered_flag: Starting ##
+
+```bash
+# Clone this project
+$ git clone https://github.com/MohamedAbdelfattah022/Problemset-Collection
+
+# Access
+$ cd Problemset-Collection
+
+# Install dependencies
+$ yarn
+
+# Run the project
+$ yarn start
+
+# The server will initialize in the <http://localhost:3000>
+```
+
+Made with :heart: by <a href="https://github.com/MohamedAbdelfattah022" target="_blank">Mohamed Abdelfattah</a>
+&#xa0;
 
 <a href="#top">Back to top</a>
