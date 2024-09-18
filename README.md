@@ -73,10 +73,10 @@ $ git clone https://github.com/MohamedAbdelfattah022/Problemset-Collection
 $ cd Problemset-Collection
 
 # Install dependencies
-$ yarn
+$ npm i
 
 # Run the project
-$ yarn start
+$ npm start
 
 # The server will initialize in the <http://localhost:3000>
 ```
