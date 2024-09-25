@@ -3,7 +3,8 @@ import { useLocation } from 'react-router-dom';
 import ProblemCard from '../components/ProblemCard';
 import SearchBar from '../components/SearchBar';
 
-const problems = [
+
+const initialProblems = [
     { id: 1, name: "Two Sum", platform: "LeetCode", difficulty: "Easy", tags: ["Arrays", "Hashing"], url: "https://leetcode.com/problems/two-sum" },
     { id: 2, name: "Dijkstra's Shortest Path", platform: "Codeforces", difficulty: "Medium", tags: ["Graphs", "Algorithms"], url: "https://codeforces.com/problemset/problem/20/C" },
     { id: 3, name: "Binary Search", platform: "HackerRank", difficulty: "Easy", tags: ["Binary Search", "Algorithms"], url: "https://www.hackerrank.com/challenges/binary-search" },
@@ -22,7 +23,7 @@ const problems = [
     { id: 16, name: "Longest Increasing Subsequence", platform: "LeetCode", difficulty: "Medium", tags: ["Dynamic Programming"], url: "https://leetcode.com/problems/longest-increasing-subsequence" }
 ];
 
-const ProblemsListPage = () => {
+const ProblemsListPage = ({ problems = initialProblems, openEditModal, onDeleteProblem, isAdmin }) => {
     const [filteredProblems, setFilteredProblems] = useState(problems);
     const [selectedTag, setSelectedTag] = useState(null);
     const [selectedDifficulty, setSelectedDifficulty] = useState(null);
@@ -35,16 +36,16 @@ const ProblemsListPage = () => {
 
     useEffect(() => {
         filterProblems(selectedDifficulty, selectedTag, category, platform, searchTerm);
-    }, [selectedDifficulty, selectedTag, category, platform, searchTerm]);
+    }, [selectedDifficulty, selectedTag, category, platform, searchTerm, problems]);  // Added 'problems' to dependencies
 
     const handleTagClick = (tag) => {
         setSelectedTag(tag);
-        filterProblems(selectedDifficulty, tag, category, searchTerm);
+        filterProblems(selectedDifficulty, tag, category, platform, searchTerm);
     };
 
     const handleDifficultyClick = (difficulty) => {
         setSelectedDifficulty(difficulty);
-        filterProblems(difficulty, selectedTag, category, searchTerm);
+        filterProblems(difficulty, selectedTag, category, platform, searchTerm);
     };
 
     const filterProblems = (difficulty, tag, category, platform, searchTerm) => {
@@ -73,13 +74,12 @@ const ProblemsListPage = () => {
         setFilteredProblems(filtered);
     };
 
-
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
     };
 
     const handleSearchClick = () => {
-        filterProblems(selectedDifficulty, selectedTag, category, searchTerm);
+        filterProblems(selectedDifficulty, selectedTag, category, platform, searchTerm);
     };
 
     const clearFilters = () => {
@@ -143,6 +143,9 @@ const ProblemsListPage = () => {
                             problem={problem}
                             onTagClick={handleTagClick}
                             onDifficultyClick={handleDifficultyClick}
+                            onDelete={onDeleteProblem}  // Pass delete handler to ProblemCard
+                            onEdit={openEditModal}     // Pass edit handler to ProblemCard
+                            isAdmin={isAdmin}          // Admin check for edit and delete buttons
                         />
                     ))}
                 </div>
