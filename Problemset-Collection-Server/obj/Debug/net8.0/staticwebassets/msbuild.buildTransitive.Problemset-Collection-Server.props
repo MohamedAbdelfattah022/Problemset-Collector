@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\Problemset-Collection-Server.props" />
+</Project>
