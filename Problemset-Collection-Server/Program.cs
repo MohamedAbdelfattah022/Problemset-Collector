@@ -7,16 +7,12 @@ namespace Problemset_Collection_Server
     {
         public static void Main(string[] args)
         {
-            //var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-            //var constr = configuration.GetSection("constr").Value;
-
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            //builder.Services.AddDbContext<AppDbContext>(builder => builder.UseSqlServer(constr));
             builder.Services.AddDbContext<AppDbContext>();
 
             var app = builder.Build();
