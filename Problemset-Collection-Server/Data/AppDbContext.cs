@@ -17,5 +17,12 @@ namespace Problemset_Collection_Server.Data
 
             optionsBuilder.UseSqlServer(constr);
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<ProblemTag>()
+                .HasKey(pt => new { pt.ProblemId, pt.TagId });
+        }
     }
 }
