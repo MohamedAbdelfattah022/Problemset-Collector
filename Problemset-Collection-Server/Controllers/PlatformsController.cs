@@ -7,17 +7,17 @@ namespace Problemset_Collection_Server.Controllers
     [Route("api/[controller]")]
     public class PlatformsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly AppDbContext dbContext;
 
-        public PlatformsController(AppDbContext dbContext)
+        public PlatformsController(AppDbContext _dbContext)
         {
-            _dbContext = dbContext;
+            dbContext = _dbContext;
         }
 
         [HttpGet]
         public ActionResult<Platform> GetPlatform() {
         
-            var platform = _dbContext.Set<Platform>().ToList();
+            var platform = dbContext.Platforms.ToList();
             return Ok(platform);
         }
     }

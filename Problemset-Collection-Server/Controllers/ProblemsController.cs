@@ -7,17 +7,17 @@ namespace Problemset_Collection_Server.Controllers
     [Route("api/[controller]")]
     public class ProblemsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly AppDbContext dbContext;
 
-        public ProblemsController(AppDbContext dbContext)
+        public ProblemsController(AppDbContext _dbContext)
         {
-            _dbContext = dbContext;
+            dbContext = _dbContext;
         }
 
         [HttpGet]
         public ActionResult<Problem> GetProblems()
         {
-            var problems = _dbContext.Set<Problem>().ToList();
+            var problems = dbContext.Problems.ToList();
             return Ok(problems);
         }
 
@@ -25,7 +25,7 @@ namespace Problemset_Collection_Server.Controllers
         [Route("{id}")]
         public ActionResult<Problem> GetProblemById(int id)   
         {
-            var problems = _dbContext.Set<Problem>().Find(id);
+            var problems = dbContext.Problems.Find(id);
             return problems == null? NotFound() : Ok(problems);
         }
 

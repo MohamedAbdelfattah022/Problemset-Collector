@@ -7,16 +7,16 @@ namespace Problemset_Collection_Server.Controllers
     [Route("api/[controller]")]
     public class TagsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
-        public TagsController(AppDbContext dbContext)
+        private readonly AppDbContext dbContext;
+        public TagsController(AppDbContext _dbContext)
         {
-            _dbContext = dbContext;
+            dbContext = _dbContext;
         }
 
         [HttpGet]
         public ActionResult<Tag> GetTags()
         {
-            var tags = _dbContext.Set<Tag>().ToList();
+            var tags = dbContext.Tags.ToList();
             return Ok(tags);
         }
     }
