@@ -2,32 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProblemCard from '../components/ProblemCard';
 import SearchBar from '../components/SearchBar';
+import { getProblems, getProblemTags, getPlatformById, getTagById } from "../api";
 
-
-const initialProblems = [
-    { id: 1, name: "Two Sum", platform: "LeetCode", difficulty: "Easy", tags: ["Arrays", "Hashing"], url: "https://leetcode.com/problems/two-sum" },
-    { id: 2, name: "Dijkstra's Shortest Path", platform: "Codeforces", difficulty: "Medium", tags: ["Graphs", "Algorithms"], url: "https://codeforces.com/problemset/problem/20/C" },
-    { id: 3, name: "Binary Search", platform: "HackerRank", difficulty: "Easy", tags: ["Binary Search", "Algorithms"], url: "https://www.hackerrank.com/challenges/binary-search" },
-    { id: 4, name: "Longest Common Subsequence", platform: "GeeksforGeeks", difficulty: "Hard", tags: ["Dynamic Programming", "Strings"], url: "https://www.geeksforgeeks.org/longest-common-subsequence-dp-4/" },
-    { id: 5, name: "Traveling Salesman Problem", platform: "CodeChef", difficulty: "Hard", tags: ["Graphs", "Dynamic Programming"], url: "https://www.codechef.com/problems/TSP" },
-    { id: 6, name: "Palindrome Partitioning", platform: "LeetCode", difficulty: "Medium", tags: ["Dynamic Programming", "Backtracking"], url: "https://leetcode.com/problems/palindrome-partitioning" },
-    { id: 7, name: "Merge Intervals", platform: "LeetCode", difficulty: "Medium", tags: ["Arrays", "Sorting"], url: "https://leetcode.com/problems/merge-intervals" },
-    { id: 8, name: "Knapsack Problem", platform: "HackerRank", difficulty: "Medium", tags: ["Dynamic Programming", "Greedy"], url: "https://www.hackerrank.com/challenges/knapsack" },
-    { id: 9, name: "Maximum Subarray", platform: "LeetCode", difficulty: "Easy", tags: ["Arrays", "Dynamic Programming"], url: "https://leetcode.com/problems/maximum-subarray" },
-    { id: 10, name: "Floyd-Warshall Algorithm", platform: "GeeksforGeeks", difficulty: "Medium", tags: ["Graphs", "Algorithms"], url: "https://www.geeksforgeeks.org/floyd-warshall-algorithm-dp-16/" },
-    { id: 11, name: "N-Queens", platform: "LeetCode", difficulty: "Hard", tags: ["Backtracking"], url: "https://leetcode.com/problems/n-queens" },
-    { id: 12, name: "Kruskal's Minimum Spanning Tree", platform: "HackerRank", difficulty: "Medium", tags: ["Graphs", "Greedy"], url: "https://www.hackerrank.com/challenges/kruskals-mst" },
-    { id: 13, name: "Sudoku Solver", platform: "LeetCode", difficulty: "Hard", tags: ["Backtracking"], url: "https://leetcode.com/problems/sudoku-solver" },
-    { id: 14, name: "Rod Cutting", platform: "GeeksforGeeks", difficulty: "Medium", tags: ["Dynamic Programming"], url: "https://www.geeksforgeeks.org/cutting-a-rod-dp-13/" },
-    { id: 15, name: "Breadth-First Search", platform: "HackerRank", difficulty: "Easy", tags: ["Graphs", "Algorithms"], url: "https://www.hackerrank.com/challenges/bfs-shortest-reach-in-a-graph" },
-    { id: 16, name: "Longest Increasing Subsequence", platform: "LeetCode", difficulty: "Medium", tags: ["Dynamic Programming"], url: "https://leetcode.com/problems/longest-increasing-subsequence" }
-];
-
-const ProblemsListPage = ({ problems = initialProblems, openEditModal, onDeleteProblem, isAdmin }) => {
-    const [filteredProblems, setFilteredProblems] = useState(problems);
+const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
+    const [problems, setProblems] = useState([]);
+    const [filteredProblems, setFilteredProblems] = useState([]);
+    const [problemTags, setProblemTags] = useState([]);
+    const [tagsMap, setTagsMap] = useState({});
+    const [platformsMap, setPlatformsMap] = useState({});
     const [selectedTag, setSelectedTag] = useState(null);
     const [selectedDifficulty, setSelectedDifficulty] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const location = useLocation();
     const query = new URLSearchParams(location.search);
@@ -35,8 +22,53 @@ const ProblemsListPage = ({ problems = initialProblems, openEditModal, onDeleteP
     const platform = query.get('platform');
 
     useEffect(() => {
+        const fetchProblems = async () => {
+            try {
+                const problemsResponse = await getProblems();
+                const problemTagsResponse = await getProblemTags();
+
+                const platformsResponse = await Promise.all(
+                    problemsResponse.data.map(problem =>
+                        getPlatformById(problem.platformId).then(res => ({
+                            platformId: problem.platformId,
+                            platformName: res.data.platformName
+                        }))
+                    )
+                );
+
+                const tagsResponse = await Promise.all(
+                    problemTagsResponse.data.map(async (tag) => {
+                        const tagResponse = await getTagById(tag.tagId);
+                        return { tagId: tag.tagId, tagName: tagResponse.data.tagName, problemId: tag.problemId };
+                    })
+                );
+
+                setProblems(problemsResponse.data);
+                setProblemTags(problemTagsResponse.data);
+                setPlatformsMap(platformsResponse.reduce((acc, platform) => {
+                    acc[platform.platformId] = platform.platformName;
+                    return acc;
+                }, {}));
+                setTagsMap(tagsResponse.reduce((acc, tag) => {
+                    acc[tag.problemId] = acc[tag.problemId] || [];
+                    acc[tag.problemId].push(tag.tagName);
+                    return acc;
+                }, {}));
+                setFilteredProblems(problemsResponse.data);
+                setLoading(false);
+            } catch (err) {
+                console.error('Failed to fetch problems:', err);
+                setError('Failed to fetch problems');
+                setLoading(false);
+            }
+        };
+
+        fetchProblems();
+    }, []);
+
+    useEffect(() => {
         filterProblems(selectedDifficulty, selectedTag, category, platform, searchTerm);
-    }, [selectedDifficulty, selectedTag, category, platform, searchTerm, problems]);  // Added 'problems' to dependencies
+    }, [selectedDifficulty, selectedTag, category, platform, searchTerm, problems]);
 
     const handleTagClick = (tag) => {
         setSelectedTag(tag);
@@ -52,22 +84,25 @@ const ProblemsListPage = ({ problems = initialProblems, openEditModal, onDeleteP
         let filtered = problems;
 
         if (category) {
-            filtered = filtered.filter(problem => problem.tags.includes(category));
+            filtered = filtered.filter(problem =>
+                tagsMap[problem.problemId]?.some(t => t === category)
+            );
         }
         if (tag) {
-            filtered = filtered.filter(problem => problem.tags.includes(tag));
+            filtered = filtered.filter(problem =>
+                tagsMap[problem.problemId]?.some(t => t === tag)
+            );
         }
         if (difficulty) {
-            filtered = filtered.filter(problem => problem.difficulty === difficulty);
+            filtered = filtered.filter(problem => problem.problemDifficulty === difficulty);
         }
         if (platform) {
-            filtered = filtered.filter(problem => problem.platform === platform);
+            filtered = filtered.filter(problem => problem.platformId === platform);
         }
         if (searchTerm) {
             filtered = filtered.filter(problem =>
-                problem.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                problem.platform.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                problem.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+                problem.problemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                problem.problemUrl?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -88,6 +123,9 @@ const ProblemsListPage = ({ problems = initialProblems, openEditModal, onDeleteP
         setSearchTerm('');
         setFilteredProblems(problems);
     };
+
+    if (loading) return <div>Loading problems...</div>;
+    if (error) return <div>{error}</div>;
 
     return (
         <div className="flex flex-col md:flex-row">
@@ -139,13 +177,17 @@ const ProblemsListPage = ({ problems = initialProblems, openEditModal, onDeleteP
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {filteredProblems.map((problem) => (
                         <ProblemCard
-                            key={problem.id}
-                            problem={problem}
+                            key={problem.problemId}
+                            problem={{
+                                ...problem,
+                                problemTags: tagsMap[problem.problemId] || [], // Attach the tags to each problem
+                                platformName: platformsMap[problem.platformId] // Attach the platform name to each problem
+                            }}
                             onTagClick={handleTagClick}
                             onDifficultyClick={handleDifficultyClick}
-                            onDelete={onDeleteProblem}  // Pass delete handler to ProblemCard
-                            onEdit={openEditModal}     // Pass edit handler to ProblemCard
-                            isAdmin={isAdmin}          // Admin check for edit and delete buttons
+                            onDelete={onDeleteProblem}
+                            onEdit={openEditModal}
+                            isAdmin={isAdmin}
                         />
                     ))}
                 </div>

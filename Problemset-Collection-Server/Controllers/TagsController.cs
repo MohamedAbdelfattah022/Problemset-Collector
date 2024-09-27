@@ -13,25 +13,21 @@ namespace Problemset_Collection_Server.Controllers
         public TagsController(AppDbContext _dbContext) { dbContext = _dbContext; }
 
         [HttpGet]
-        public ActionResult<Tag> GetTags()
-        {
-            try
-            {
+        public ActionResult<Tag> GetTags() {
+            try {
                 var tags = dbContext.Tags.ToList();
 
                 if (tags == null || !tags.Any()) return NotFound("No tags found.");
 
                 return Ok(tags);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         [HttpGet("{id:int}")]
-        public ActionResult<Tag> GetById(int id)
-        {
+        public ActionResult<Tag> GetById(int id) {
             if (id <= 0) return BadRequest("Id must be a positive integer.");
 
             Tag tag = dbContext.Tags.FirstOrDefault(t => t.TagId == id);
@@ -42,8 +38,7 @@ namespace Problemset_Collection_Server.Controllers
         }
 
         [HttpPost("{tagName}")]
-        public ActionResult<Tag> AddTag([FromRoute, Required] string tagName)
-        {
+        public ActionResult<Tag> AddTag([FromRoute, Required] string tagName) {
             if (string.IsNullOrWhiteSpace(tagName))
                 return BadRequest("Tag name cannot be empty or whitespace.");
 
@@ -60,15 +55,13 @@ namespace Problemset_Collection_Server.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult<Tag> UpdateTag(int id, [FromBody] Tag tag)
-        {
+        public ActionResult<Tag> UpdateTag(int id, [FromBody] Tag tag) {
             if (id <= 0) return BadRequest("Id must be a positive integer.");
 
             if (tag == null || string.IsNullOrWhiteSpace(tag.TagName))
                 return BadRequest("Tag data is invalid. Ensure tag name is provided.");
 
-            try
-            {
+            try {
                 Tag currentTag = dbContext.Tags.FirstOrDefault(t => t.TagId == id);
 
                 if (currentTag == null) return NotFound($"Tag with Id {id} not found.");
@@ -78,19 +71,16 @@ namespace Problemset_Collection_Server.Controllers
 
                 return Ok(currentTag);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 return StatusCode(500, ex);
             }
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult DeleteTag(int id)
-        {
+        public ActionResult DeleteTag(int id) {
             if (id <= 0) return BadRequest("Id must be a positive integer.");
 
-            try
-            {
+            try {
                 Tag tag = dbContext.Tags.FirstOrDefault(t => t.TagId == id);
 
                 if (tag == null) return NotFound($"Tag with Id {id} not found.");
@@ -98,8 +88,7 @@ namespace Problemset_Collection_Server.Controllers
                 dbContext.Tags.Remove(tag);
                 dbContext.SaveChanges();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
 
