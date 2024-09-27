@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProblemCard from '../components/ProblemCard';
 import SearchBar from '../components/SearchBar';
-import { getProblems, getProblemTags, getPlatformById, getTagById } from "../api";
+import { getProblems, getProblemTags, getPlatformById, getTagById, getTags } from "../api";
 
 const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
     const [problems, setProblems] = useState([]);
@@ -15,6 +15,10 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [tags, setTags] = useState([]);
+
+    const [visibleTagsCount, setVisibleTagsCount] = useState(5);
+    const [expanded, setExpanded] = useState(false);
 
     const location = useLocation();
     const query = new URLSearchParams(location.search);
@@ -26,6 +30,7 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
             try {
                 const problemsResponse = await getProblems();
                 const problemTagsResponse = await getProblemTags();
+                const tagResponse = await getTags();
 
                 const platformsResponse = await Promise.all(
                     problemsResponse.data.map(problem =>
@@ -45,6 +50,8 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
 
                 setProblems(problemsResponse.data);
                 setProblemTags(problemTagsResponse.data);
+                setTags(tagResponse.data);
+
                 setPlatformsMap(platformsResponse.reduce((acc, platform) => {
                     acc[platform.platformId] = platform.platformName;
                     return acc;
@@ -124,8 +131,39 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
         setFilteredProblems(problems);
     };
 
-    if (loading) return <div>Loading problems...</div>;
-    if (error) return <div>{error}</div>;
+    const toggleTags = () => {
+        if (expanded) {
+            setVisibleTagsCount(5); // Collapse and show only 5 tags
+        } else {
+            setVisibleTagsCount(tags.length); // Expand to show all tags
+        }
+        setExpanded(!expanded); // Toggle the expanded state
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="flex items-center space-x-2 text-blue-500">
+                    <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <span>Loading problems...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="bg-red-100 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Error:</strong>
+                    <span className="block sm:inline ml-2">{error}</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col md:flex-row">
@@ -162,16 +200,24 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
                 <div className="mb-4">
                     <h2 className="text-xl font-semibold">Tags</h2>
                     <div className="flex flex-wrap gap-2 mt-4">
-                        {['Arrays', 'Hashing', 'Graphs', 'Algorithms', 'Binary Search', 'Strings', 'Dynamic Programming', 'Backtracking', 'Sorting', 'Greedy'].map((tag) => (
+                        {tags.slice(0, visibleTagsCount).map((tag) => (
                             <button
-                                key={tag}
-                                onClick={() => handleTagClick(tag)}
-                                className={`px-4 py-2 rounded-lg text-white ${selectedTag === tag ? 'bg-blue-500' : 'bg-gray-300'} mb-2`}
+                                key={tag.tagName}
+                                onClick={() => handleTagClick(tag.tagName)}
+                                className={`px-4 py-2 rounded-lg text-white ${selectedTag === tag.tagName ? 'bg-blue-500' : 'bg-gray-300'} mb-2`}
                             >
-                                {tag}
+                                {tag.tagName}
                             </button>
                         ))}
                     </div>
+                    {tags.length > 5 && (
+                        <button
+                            onClick={toggleTags}
+                            className="mt-2 text-blue-500 hover:underline"
+                        >
+                            {expanded ? 'Show Less' : 'Show More'}
+                        </button>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -180,8 +226,8 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
                             key={problem.problemId}
                             problem={{
                                 ...problem,
-                                problemTags: tagsMap[problem.problemId] || [], // Attach the tags to each problem
-                                platformName: platformsMap[problem.platformId] // Attach the platform name to each problem
+                                problemTags: tagsMap[problem.problemId] || [],
+                                platformName: platformsMap[problem.platformId]
                             }}
                             onTagClick={handleTagClick}
                             onDifficultyClick={handleDifficultyClick}

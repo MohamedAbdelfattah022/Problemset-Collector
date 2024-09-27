@@ -9,24 +9,21 @@ namespace Problemset_Collection_Server.Controllers
     {
         private readonly AppDbContext dbContext;
 
-        public ProblemsController(AppDbContext _dbContext)
-        {
+        public ProblemsController(AppDbContext _dbContext) {
             dbContext = _dbContext;
         }
 
         [HttpGet]
-        public ActionResult<Problem> GetProblems()
-        {
+        public ActionResult<Problem> GetProblems() {
             var problems = dbContext.Problems.ToList();
             return Ok(problems);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public ActionResult<Problem> GetProblemById(int id)   
-        {
+        public ActionResult<Problem> GetProblemById(int id) {
             var problems = dbContext.Problems.Find(id);
-            return problems == null? NotFound() : Ok(problems);
+            return problems == null ? NotFound() : Ok(problems);
         }
 
 
