@@ -49,8 +49,8 @@ export const getPlatformByName = async (platformName) => {
 };
 
 // Problems API
-export const getProblems = async () => {
-    return await axios.get(`${API_URL}/Problems`);
+export const getProblems = async (page = 1, pageSize = 10) => {
+    return await axios.get(`${API_URL}/Problems?page=${page}&pageSize=${pageSize}`);
 };
 
 export const getProblemById = async (id) => {
@@ -67,6 +67,10 @@ export const updateProblem = async (id, problemData) => {
 
 export const deleteProblem = async (id) => {
     return await axios.delete(`${API_URL}/Problems/${id}`);
+};
+
+export const getDifficulties = async () => {
+    return await axios.get(`${API_URL}/Problems/difficulties`);
 };
 
 // ProblemTags API
