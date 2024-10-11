@@ -2,142 +2,120 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProblemCard from '../components/ProblemCard';
 import SearchBar from '../components/SearchBar';
-import { getProblems, getProblemTags, getPlatformById, getTagById, getTags, getDifficulties } from "../api";
+import { getProblems, getDifficulties } from "../api";
+import { HiOutlineX } from 'react-icons/hi';
 
 const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
+    const pageSize = 10;
+    const tagPagination = 6;
+    const difficultiesPagination = 5; // Number of difficulties to show initially
+
     const [problems, setProblems] = useState([]);
     const [filteredProblems, setFilteredProblems] = useState([]);
-    const [problemTags, setProblemTags] = useState([]);
-    const [tagsMap, setTagsMap] = useState({});
-    const [platformsMap, setPlatformsMap] = useState({});
-    const [selectedTag, setSelectedTag] = useState(null);
-    const [selectedDifficulty, setSelectedDifficulty] = useState(null);
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [selectedDifficulties, setSelectedDifficulties] = useState([]);
     const [difficulties, setDifficulties] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [tags, setTags] = useState([]);
-    const [visibleTagsCount, setVisibleTagsCount] = useState(5); // Control visible tags
+    const [visibleTagsCount, setVisibleTagsCount] = useState(tagPagination);
+    const [visibleDifficultiesCount, setVisibleDifficultiesCount] = useState(difficultiesPagination); // For difficulties
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
     const observer = useRef();
-
-    const pageSize = 10;
 
     const location = useLocation();
     const query = new URLSearchParams(location.search);
     const category = query.get('category');
     const platform = query.get('platform');
 
-    const fetchProblems = async (page, append = false) => {
+    const fetchInitialData = async () => {
         setLoading(true);
         try {
-            const problemsResponse = await getProblems(page, pageSize);
-            const platformsResponse = await Promise.all(
-                problemsResponse.data.map(problem =>
-                    getPlatformById(problem.platformId).then(res => ({
-                        platformId: problem.platformId,
-                        platformName: res.data.platformName
-                    }))
-                )
-            );
+            const [problemsResponse, difficultiesResponse] = await Promise.all([
+                getProblems(1, pageSize),
+                getDifficulties(),
+            ]);
 
-            const problemTagsResponse = await getProblemTags();
-            const tagsResponse = await getTags();
-            const difficultiesResponse = await getDifficulties(); // Fetch difficulties from API
-            // Ensure "Easy", "Medium", "Hard" are always at the top
             const orderedDifficulties = ['Easy', 'Medium', 'Hard', ...difficultiesResponse.data.filter(d => !['Easy', 'Medium', 'Hard'].includes(d))];
 
-            setDifficulties(orderedDifficulties); // Set ordered difficulties
+            setProblems(problemsResponse.data);
+            setFilteredProblems(problemsResponse.data);
+            setDifficulties(orderedDifficulties);
 
-            const tagsMap = await Promise.all(
-                problemTagsResponse.data.map(async (tag) => {
-                    const tagResponse = await getTagById(tag.tagId);
-                    return { tagId: tag.tagId, tagName: tagResponse.data.tagName, problemId: tag.problemId };
-                })
-            );
-
-            setPlatformsMap(prev => ({
-                ...prev,
-                ...platformsResponse.reduce((acc, platform) => {
-                    acc[platform.platformId] = platform.platformName;
-                    return acc;
-                }, {})
-            }));
-
-            setTagsMap(prev => ({
-                ...prev,
-                ...tagsMap.reduce((acc, tag) => {
-                    acc[tag.problemId] = acc[tag.problemId] || [];
-                    acc[tag.problemId].push(tag.tagName);
-                    return acc;
-                }, {})
-            }));
-
-            // Update problems based on whether we are appending or replacing
-            if (append) {
-                setProblems(prev => [...prev, ...problemsResponse.data]);
-            } else {
-                setProblems(problemsResponse.data);
-            }
-
-            setFilteredProblems(prev => append ? [...prev, ...problemsResponse.data] : problemsResponse.data);
-            setHasMore(problemsResponse.data.length === pageSize); // Check if we have enough problems for the current page size
+            if (problemsResponse.data.length < pageSize) setHasMore(false);
+            else setHasMore(problemsResponse.data.length >= pageSize);
         } catch (err) {
-            console.error('Failed to fetch problems:', err);
-            setError('Failed to fetch problems');
+            console.error('Failed to fetch initial data:', err);
+            setError('Failed to fetch data');
         } finally {
             setLoading(false);
         }
     };
 
-    // Fetch all problems on initial load
+    const fetchMoreProblems = async (page) => {
+        setLoading(true);
+        try {
+            const problemsResponse = await getProblems(page, pageSize);
+            setProblems(prev => [...prev, ...problemsResponse.data]);
+            setFilteredProblems(prev => [...prev, ...problemsResponse.data]);
+
+            if (problemsResponse.data.length < pageSize) setHasMore(false);
+            else setHasMore(problemsResponse.data.length >= pageSize);
+        } catch (err) {
+            console.error('Failed to fetch more problems:', err);
+            setError('Failed to fetch more problems');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        fetchProblems(page); // Fetch the first page of problems
+        fetchInitialData();
     }, []);
 
-    // Load more problems when the page changes
     useEffect(() => {
         if (page > 1) {
-            fetchProblems(page, true); // Append problems for subsequent pages
+            fetchMoreProblems(page);
         }
     }, [page]);
 
-    // Infinite Scroll: Trigger when scrolling to the bottom
     const lastProblemElementRef = (node) => {
-        if (loading || !hasMore) return; // Stop observing if loading or no more data
-
+        if (loading || !hasMore) return;
         if (observer.current) observer.current.disconnect();
 
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && hasMore) {
-                setPage(prevPage => prevPage + 1); // Load next page when reaching the bottom
+                setPage(prevPage => prevPage + 1);
             }
         });
 
         if (node) observer.current.observe(node);
     };
 
-    // Filter problems based on selected criteria
-    const filterProblems = (difficulty, tag, category, platform, searchTerm) => {
+    const filterProblems = (selectedDifficulties, selectedTags, category, platform, searchTerm) => {
         let filtered = problems;
 
         if (category) {
             filtered = filtered.filter(problem =>
-                tagsMap[problem.problemId]?.some(t => t === category)
+                problem.tags?.some(t => t === category)
             );
         }
-        if (tag) {
+
+        if (selectedTags.length > 0) {
             filtered = filtered.filter(problem =>
-                tagsMap[problem.problemId]?.some(t => t === tag)
+                selectedTags.every(selectedTag => problem.tags?.includes(selectedTag))
             );
         }
-        if (difficulty) {
-            filtered = filtered.filter(problem => problem.problemDifficulty === difficulty);
+
+        if (selectedDifficulties.length > 0) {
+            filtered = filtered.filter(problem => selectedDifficulties.includes(problem.problemDifficulty));
         }
+
         if (platform) {
-            filtered = filtered.filter(problem => problem.platformId === platform);
+            filtered = filtered.filter(problem => problem.platformName === platform);
         }
+
         if (searchTerm) {
             filtered = filtered.filter(problem =>
                 problem.problemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -146,180 +124,154 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
         }
 
         setFilteredProblems(filtered);
-        setHasMore(filtered.length === pageSize); // Check if there are more problems to load
     };
 
-    // Fetch tags and problems on initial load
     useEffect(() => {
-        const fetchInitialData = async () => {
-            try {
-                const problemTagsResponse = await getProblemTags();
-                const tagsResponse = await getTags();
-
-                const tagsMap = await Promise.all(
-                    problemTagsResponse.data.map(async (tag) => {
-                        const tagResponse = await getTagById(tag.tagId);
-                        return { tagId: tag.tagId, tagName: tagResponse.data.tagName, problemId: tag.problemId };
-                    })
-                );
-
-                setTags(tagsResponse.data);
-                setTagsMap(tagsMap.reduce((acc, tag) => {
-                    acc[tag.problemId] = acc[tag.problemId] || [];
-                    acc[tag.problemId].push(tag.tagName);
-                    return acc;
-                }, {}));
-            } catch (err) {
-                console.error('Failed to fetch tags:', err);
-                setError('Failed to fetch tags');
-            }
-        };
-
-        fetchInitialData();
-    }, []);
-
-    // Update filtered problems on filters change
-    useEffect(() => {
-        filterProblems(selectedDifficulty, selectedTag, category, platform, searchTerm);
-    }, [selectedDifficulty, selectedTag, category, platform, searchTerm, problems]);
+        filterProblems(selectedDifficulties, selectedTags, category, platform, searchTerm);
+    }, [selectedDifficulties, selectedTags, category, platform, searchTerm, problems]);
 
     const handleTagClick = (tag) => {
-        setSelectedTag(tag);
-        filterProblems(selectedDifficulty, tag, category, platform, searchTerm);
+        setSelectedTags((prevSelectedTags) => {
+            if (prevSelectedTags.includes(tag)) {
+                return prevSelectedTags.filter((t) => t !== tag);
+            } else {
+                return [...prevSelectedTags, tag];
+            }
+        });
     };
 
     const handleDifficultyClick = (difficulty) => {
-        setSelectedDifficulty(difficulty);
-        filterProblems(difficulty, selectedTag, category, platform, searchTerm);
+        setSelectedDifficulties((prevSelectedDifficulties) => {
+            if (prevSelectedDifficulties.includes(difficulty)) {
+                return prevSelectedDifficulties.filter((d) => d !== difficulty);
+            } else {
+                return [...prevSelectedDifficulties, difficulty];
+            }
+        });
     };
 
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
-    };
-
-    const handleSearchClick = () => {
-        filterProblems(selectedDifficulty, selectedTag, category, platform, searchTerm);
-    };
+    const handleSearchChange = (event) => setSearchTerm(event.target.value);
+    const handleSearchClick = () => filterProblems(selectedDifficulties, selectedTags, category, platform, searchTerm);
 
     const clearFilters = () => {
-        setSelectedTag(null);
-        setSelectedDifficulty(null);
+        setSelectedTags([]);
+        setSelectedDifficulties([]);
         setSearchTerm('');
-        setPage(1); // Reset page to 1 when clearing filters
-        fetchProblems(1); // Re-fetch the first page
+        setPage(1);
+        fetchInitialData();
     };
 
-    const handleSeeMoreTags = () => {
-        setVisibleTagsCount(tags.length); // Show all tags
+    const extractUniqueTags = () => {
+        const allTags = problems.flatMap(problem => problem.tags);
+        const uniqueTags = [...new Set(allTags)];
+
+        const selectedTagsFiltered = uniqueTags.filter(tag => selectedTags.includes(tag));
+        const unselectedTags = uniqueTags.filter(tag => !selectedTags.includes(tag));
+
+        return [...selectedTagsFiltered, ...unselectedTags];
     };
 
-    const handleSeeLessTags = () => {
-        setVisibleTagsCount(5); // Reset to initial count
+    const extractUniqueDifficulties = () => {
+        const allDifficulties = difficulties;
+        const selectedDifficultiesFiltered = allDifficulties.filter(d => selectedDifficulties.includes(d));
+        const unselectedDifficulties = allDifficulties.filter(d => !selectedDifficulties.includes(d));
+
+        return [...selectedDifficultiesFiltered, ...unselectedDifficulties];
     };
-
-    if (loading && page === 1) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="flex items-center space-x-2 text-blue-500">
-                    <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                    <span>Loading problems...</span>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="bg-red-100 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong className="font-bold">Error:</strong>
-                    <span className="block sm:inline"> {error}</span>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div>
             <main className="p-4">
                 <div className="mb-4">
-                    {(selectedTag || selectedDifficulty || category || searchTerm) && (
+                    {(selectedTags.length > 0 || selectedDifficulties.length > 0 || category || searchTerm) && (
                         <button
                             onClick={clearFilters}
-                            className="text-blue-500 hover:underline"
+                            className="flex items-center bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300"
+                            aria-label="Clear all filters"
+                            title="Clear all filters"
                         >
-                            Clear filters ✖️
+                            <HiOutlineX className="mr-2" /> Clear Filters
                         </button>
                     )}
                 </div>
-                <SearchBar
-                    searchTerm={searchTerm}
-                    onSearchChange={handleSearchChange}
-                    onSearchClick={handleSearchClick}
-                />
+                <SearchBar searchTerm={searchTerm} onSearchChange={handleSearchChange} onSearchClick={handleSearchClick} />
+                
+                {/* Difficulties Section */}
                 <div className="mb-4">
                     <h2 className="text-xl font-semibold">Difficulties</h2>
                     <div className="flex flex-wrap gap-2 mt-4">
-                        {difficulties.map((difficulty) => (
+                        {extractUniqueDifficulties().slice(0, visibleDifficultiesCount).map((difficulty) => (
                             <button
                                 key={difficulty}
                                 onClick={() => handleDifficultyClick(difficulty)}
-                                className={`px-4 py-2 rounded-lg text-white ${selectedDifficulty === difficulty ? 'bg-blue-500' : 'bg-gray-300'}`}
+                                className={`px-4 py-2 rounded-lg text-white ${selectedDifficulties.includes(difficulty) ? 'bg-blue-500' : 'bg-gray-300'}`}
                             >
                                 {difficulty}
                             </button>
                         ))}
                     </div>
-                </div>
-                <div className="mb-4">
-                    <h2 className="text-xl font-semibold">Tags</h2>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                        {tags.slice(0, visibleTagsCount).map((tag) => (
-                            <button
-                                key={tag.tagName}
-                                onClick={() => handleTagClick(tag.tagName)}
-                                className={`px-4 py-2 rounded-lg text-white ${selectedTag === tag.tagName ? 'bg-blue-500' : 'bg-gray-300'} mb-2`}
-                            >
-                                {tag.tagName}
-                            </button>
-                        ))}
-                    </div>
-                    {visibleTagsCount < tags.length && (
-                        <button onClick={handleSeeMoreTags} className="text-blue-500 hover:underline">
-                            See More
+                    {visibleDifficultiesCount < extractUniqueDifficulties().length && (
+                        <button
+                            onClick={() => setVisibleDifficultiesCount(extractUniqueDifficulties().length)}
+                            className="text-blue-500 hover:underline mt-2"
+                        >
+                            Show More
                         </button>
                     )}
-                    {visibleTagsCount > 5 && (
-                        <button onClick={handleSeeLessTags} className="text-blue-500 hover:underline">
-                            See Less
+                    {visibleDifficultiesCount > difficultiesPagination && (
+                        <button
+                            onClick={() => setVisibleDifficultiesCount(difficultiesPagination)}
+                            className="text-blue-500 hover:underline mt-2"
+                        >
+                            Show Less
                         </button>
                     )}
                 </div>
 
+                {/* Tags Section */}
+                <div className="mb-4">
+                    <h2 className="text-xl font-semibold">Tags</h2>
+                    <div className="flex flex-wrap gap-2 mt-4">
+                        {extractUniqueTags().slice(0, visibleTagsCount).map((tag) => (
+                            <button
+                                key={tag}
+                                onClick={() => handleTagClick(tag)}
+                                className={`px-4 py-2 rounded-lg text-white ${selectedTags.includes(tag) ? 'bg-blue-500' : 'bg-gray-300'} mb-2`}
+                            >
+                                {tag}
+                            </button>
+                        ))}
+                    </div>
+                    {visibleTagsCount < extractUniqueTags().length && (
+                        <button onClick={() => setVisibleTagsCount(extractUniqueTags().length)} className="text-blue-500 hover:underline">Show More</button>
+                    )}
+                    {visibleTagsCount > tagPagination && (
+                        <button onClick={() => setVisibleTagsCount(tagPagination)} className="text-blue-500 hover:underline">Show Less</button>
+                    )}
+                </div>
+
+                {/* Problem Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {filteredProblems.map((problem, index) => {
-                        const isLastProblem = filteredProblems.length === index + 1; // Check if this is the last problem
+                        const isLastProblem = filteredProblems.length === index + 1;
                         return (
                             <div ref={isLastProblem ? lastProblemElementRef : null} key={problem.problemId}>
                                 <ProblemCard
-                                    problem={{
-                                        ...problem,
-                                        problemTags: tagsMap[problem.problemId] || [],
-                                        platformName: platformsMap[problem.platformId]
-                                    }}
+                                    problem={problem}
+                                    onEdit={openEditModal}
+                                    onDeleteProblem={onDeleteProblem}
+                                    isAdmin={isAdmin}
                                     onTagClick={handleTagClick}
                                     onDifficultyClick={handleDifficultyClick}
-                                    onDelete={onDeleteProblem}
-                                    onEdit={openEditModal}
-                                    isAdmin={isAdmin}
+                                    onDelete={() => onDeleteProblem(problem.problemId)}
                                 />
                             </div>
                         );
                     })}
                 </div>
+
+                {loading && <p className="text-center mt-4">Loading...</p>}
+                {error && <p className="text-center mt-4 text-red-500">{error}</p>}
             </main>
         </div>
     );
