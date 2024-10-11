@@ -1,6 +1,28 @@
 import axios from 'axios';
 
-const API_URL = 'https://localhost:7287/api';
+const API_URL = 'http://localhost:5293/api';
+
+// Invite 
+export const inviteAdmin = (email) => {
+    return axios.post(`${API_URL}/invite`, {
+        email,
+    });
+};
+
+// Users API
+export const registerUser = (email, password) => {
+    return axios.post(`${API_URL}/Users/register`, {
+        email,
+        password,
+    });
+};
+
+export const loginUser = (email, password) => {
+    return axios.post(`${API_URL}/Users/login`, {
+        email,
+        password,
+    });
+};
 
 // Tags API
 export const getTags = async () => {
@@ -53,12 +75,12 @@ export const getProblems = async (page = 1, pageSize = 10) => {
     return await axios.get(`${API_URL}/Problems?page=${page}&pageSize=${pageSize}`);
 };
 
-export const getProblemById = async (id) => {
-    return await axios.get(`${API_URL}/Problems/${id}`);
-};
-
 export const createProblem = async (problemData) => {
     return await axios.post(`${API_URL}/Problems`, problemData);
+};
+
+export const getProblemById = async (id) => {
+    return await axios.get(`${API_URL}/Problems/${id}`);
 };
 
 export const updateProblem = async (id, problemData) => {
