@@ -1,87 +1,99 @@
-<h1 align="center">Problemset Collection</h1>
-
-<p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/MohamedAbdelfattah022/Problemset-Collection?color=56BEB8">
- &#xa0; 
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/MohamedAbdelfattah022/Problemset-Collection?color=56BEB8">
- &#xa0; 
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/MohamedAbdelfattah022/Problemset-Collection?color=56BEB8">
-</p>
+<h1 align="center">Problemset Collector</h1>
 
 <!-- Status -->
 
 <h4 align="center"> 
-	🚧  Problemset-Collection 🚀 Under construction...  🚧
+	🚧  Problemset Collector 🚀 Under construction...  🚧
 </h4> 
 
 <hr>
 
 <p align="center">
-  <a href="#dart-about">About</a> &#xa0; | &#xa0; 
-  <a href="#sparkles-features">Features</a> &#xa0; | &#xa0;
-  <a href="#rocket-technologies">Technologies</a> &#xa0; | &#xa0;
-  <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
-  <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
+  <a href="#about">About</a> &#xa0; | &#xa0; 
+  <a href="#features">Features</a> &#xa0; | &#xa0;
+  <a href="#technologies">Technologies</a> &#xa0; | &#xa0;
+  <a href="#requirements">Requirements</a> &#xa0; | &#xa0;
+  <a href="#getting-started">Getting Started</a> &#xa0; | &#xa0;
   <a href="https://github.com/MohamedAbdelfattah022" target="_blank">Author</a>
 </p>
 
 <br>
 
-## :dart: About ##
+## About
 
-This Project is a web application designed to help users access and explore a curated collection of coding problems. It categorizes problems by difficulty and topic and provides a platform for users to find and solve problems from various platforms like LeetCode, Codeforces, AtCoder, CodeChef, and so on.
+The Problemset Collector is a web application designed to help users access and explore a **Centralized** collection of coding problems. This platform categorizes problems by difficulty and topic, enabling users to efficiently find and solve challenges from various Problem Solving sites, including LeetCode, Codeforces, AtCoder, CodeChef, and others.
 
+## Features
 
-## :sparkles: Features ##
+### User Features
+- **Problem Browsing**: Users can browse a list of coding problems categorized by various platforms and difficulties. Each problem displays relevant details such as problem name, tags, and difficulty level.
 
-:heavy_check_mark: **Landing Page**: : Provides an overview and access to various categories and platforms.;
+- **Dynamic Filtering**: 
+  - Users can filter problems by selecting specific tags and difficulty levels.
+  
+  - The system supports searching by problem name, platform name, and category, allowing users to find specific problems quickly.
 
-:heavy_check_mark: **Problems List Page**: Displays problems based on selected filters like difficulty, tags, category, and platform.;
+### Admin Features
+- **Problem Management**: Admin users have the ability to:
+  - **Add New Problems**: Add new Problem to the list.
+  - **Edit Problems**: Modify the details of existing problems.
+  - **Delete Problems**: Remove problems from the collection, ensuring the database remains up-to-date.
 
-:heavy_check_mark: **Search Functionality**: Allows users to search for problems by name, platform, or tags.;
-:heavy_check_mark: **Responsive Design**: Ensures the application is usable on various screen sizes and devices.;
+- **Tag Management**: Admins can manage tags associated with each problem, facilitating easier categorization and retrieval of problems.
 
-## :rocket: Technologies ##
+- **Difficulty Level Management**: Admins can define and manage difficulty levels, allowing for a more structured approach to problem categorization.
 
-The following tools were used in this project:
+## Technologies
+This project utilizes the following technologies:
 
-**DBMS**
-- [MS SQL Server](https://www.microsoft.com/en-us/sql-server)
+**Database Management System**
+- [MS SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
 
-**Client**
+**Client-Side**
 - [Node.js](https://nodejs.org/en/)
-- [React](https://pt-br.reactjs.org/)
+- [React.js](https://react.dev/)
 
-**Server**
+**Server-Side**
+- [ASP.NET Core](https://dotnet.microsoft.com/en-us/apps/aspnet)
 
+## Requirements
 
-## :white_check_mark: Requirements ##
+Before starting ensure you have the following installed:
 
-Before starting :checkered_flag:, you need to have:
-- [Git](https://git-scm.com) 
-- [Node](https://nodejs.org/en/)
-- [React](https://pt-br.reactjs.org/)
-- [MS SQL Server](https://www.microsoft.com/en-us/sql-server)
+- [Git](https://git-scm.com)
+- [Node.js](https://nodejs.org/en/)
+- [React](https://react.dev/)
+- [MS SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+- [.NET SDK](https://dotnet.microsoft.com/en-us/download)
 
-## :checkered_flag: Starting ##
+## Getting Started
+
+Follow these steps to set up the project locally:
 
 ```bash
 # Clone this project
-$ git clone https://github.com/MohamedAbdelfattah022/Problemset-Collection
+git clone https://github.com/MohamedAbdelfattah022/Problemset-Collector
 
-# Access
-$ cd Problemset-Collection
+# Navigate into the project directory
+cd Problemset-Collector
 
-# Install dependencies
-$ npm i
+# Navigate into the Client directory
+cd client
 
-# Run the project
-$ npm start
+# Install client-side dependencies
+npm install
 
-# The server will initialize in the <http://localhost:3000>
+# Run the client-side application
+npm start
+# The client will initialize at <http://localhost:3000>
+
+# For server-side setup, navigate to the server directory and run:
+cd Problemset-Collection-Server
+
+dotnet run
+# The server will initialize at <http://localhost:5293>
 ```
 
-Made with :heart: by <a href="https://github.com/MohamedAbdelfattah022" target="_blank">Mohamed Abdelfattah</a>
-&#xa0;
+Made with ❤️ by <a href="https://github.com/MohamedAbdelfattah022" target="_blank">Mohamed Abdelfattah</a> 
 
 <a href="#top">Back to top</a>
