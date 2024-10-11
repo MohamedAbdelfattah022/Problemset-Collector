@@ -14,6 +14,7 @@
   <a href="#technologies">Technologies</a> &#xa0; | &#xa0;
   <a href="#requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#getting-started">Getting Started</a> &#xa0; | &#xa0;
+  <a href="#license">License</a> &#xa0; | &#xa0;
   <a href="https://github.com/MohamedAbdelfattah022" target="_blank">Author</a>
 </p>
 
@@ -93,6 +94,11 @@ cd Problemset-Collection-Server
 dotnet run
 # The server will initialize at <http://localhost:5293>
 ```
+
+## License ##
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+Feel free to use, modify, and distribute the code while providing appropriate credit.
 
 Made with ❤️ by <a href="https://github.com/MohamedAbdelfattah022" target="_blank">Mohamed Abdelfattah</a> 
 
