@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using dotenv.net;
+using Microsoft.EntityFrameworkCore;
 
 namespace Problemset_Collection_Server.Data
 {
@@ -9,13 +10,14 @@ namespace Problemset_Collection_Server.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ProblemTag> ProblemTags { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<AdminInvitation> AdminInvitations { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             base.OnConfiguring(optionsBuilder);
+            DotEnv.Load();
 
-            var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-            var constr = configuration.GetSection("constr").Value;
+            var connectionString = Environment.GetEnvironmentVariable("constr");
 
-            optionsBuilder.UseSqlServer(constr);
+            optionsBuilder.UseSqlServer(connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {

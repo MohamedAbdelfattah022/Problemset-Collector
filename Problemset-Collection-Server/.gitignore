@@ -9,3 +9,5 @@ obj/
 
 # ASP.NET
 appsettings.json
+
+.env

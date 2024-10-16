@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Problemset_Collection_Server.Data;
 
 namespace Problemset_Collection_Server.Controllers
@@ -36,6 +37,7 @@ namespace Problemset_Collection_Server.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public ActionResult<Platform> AddPlatform(Platform platform) {
             string platformName = platform.PlatformName.ToLower();
             string platformUrl = platform.PlatformUrl;
@@ -54,6 +56,7 @@ namespace Problemset_Collection_Server.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize]
         public ActionResult<Platform> UpdatePlatform(int id, Platform platform) {
             if (id <= 0) return BadRequest("ID must be a positive integer.");
 
@@ -70,6 +73,7 @@ namespace Problemset_Collection_Server.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize]
         public ActionResult<Platform> DeletePlatform(int id) {
             if (id <= 0) return BadRequest("ID must be a positive integer.");
 

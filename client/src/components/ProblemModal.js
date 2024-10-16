@@ -40,18 +40,8 @@ const ProblemModal = ({ problem, onClose }) => {
     }, []);
 
     useEffect(() => {
-        console.log('Problem passed to modal:', problem);
         if (problem) {
             setFormData({
-                id: problem.problemId || null,
-                name: problem.problemName || '',
-                platform: problem.platformName || '',
-                difficulty: problem.problemDifficulty || '',
-                url: problem.problemUrl || '',
-                tags: problem.tags || [],
-            });
-
-            console.log('Form data being set:', {
                 id: problem.problemId || null,
                 name: problem.problemName || '',
                 platform: problem.platformName || '',

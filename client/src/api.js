@@ -2,27 +2,26 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5293/api';
 
-// Invite 
-export const inviteAdmin = (email) => {
-    return axios.post(`${API_URL}/invite`, {
-        email,
-    });
-};
-
 // Users API
-export const registerUser = (email, password) => {
-    return axios.post(`${API_URL}/Users/register`, {
-        email,
-        password,
+export const inviteAdmin = (email) => {
+    return axios.post(`${API_URL}/Users/invite`, email, {
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
     });
 };
 
-export const loginUser = (email, password) => {
-    return axios.post(`${API_URL}/Users/login`, {
-        email,
-        password,
-    });
+export const registerUser = (formData) => {
+    return axios.post(`${API_URL}/Users/register`, formData);
 };
+
+export const loginUser = async (email, password) => {
+    const response = await axios.post(`${API_URL}/Users/login`, { email, password });
+    localStorage.setItem('token', response.data.token);
+    return response;
+};
+
 
 // Tags API
 export const getTags = async () => {
@@ -34,17 +33,31 @@ export const getTagById = async (id) => {
 };
 
 export const createTag = async (tagName) => {
-    return await axios.post(`${API_URL}/Tags`, { tagName });
+    const token = localStorage.getItem('token');
+    return await axios.post(`${API_URL}/Tags/${tagName}`, {}, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const updateTag = async (id, tagName) => {
-    return await axios.put(`${API_URL}/Tags/${id}`, { tagName });
+    const token = localStorage.getItem('token');
+    return await axios.put(`${API_URL}/Tags/${id}`, { tagName }, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const deleteTag = async (id) => {
-    return await axios.delete(`${API_URL}/Tags/${id}`);
+    const token = localStorage.getItem('token');
+    return await axios.delete(`${API_URL}/Tags/${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
-
 // Platforms API
 export const getPlatforms = async () => {
     return await axios.get(`${API_URL}/Platforms`);
@@ -55,15 +68,30 @@ export const getPlatformById = async (id) => {
 };
 
 export const createPlatform = async (platformData) => {
-    return await axios.post(`${API_URL}/Platforms`, platformData);
+    const token = localStorage.getItem('token');
+    return await axios.post(`${API_URL}/Platforms`, platformData, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const updatePlatform = async (id, platformData) => {
-    return await axios.put(`${API_URL}/Platforms/${id}`, platformData);
+    const token = localStorage.getItem('token');
+    return await axios.put(`${API_URL}/Platforms/${id}`, platformData, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const deletePlatform = async (id) => {
-    return await axios.delete(`${API_URL}/Platforms/${id}`);
+    const token = localStorage.getItem('token');
+    return await axios.delete(`${API_URL}/Platforms/${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const getPlatformByName = async (platformName) => {
@@ -76,7 +104,12 @@ export const getProblems = async (page = 1, pageSize = 10) => {
 };
 
 export const createProblem = async (problemData) => {
-    return await axios.post(`${API_URL}/Problems`, problemData);
+    const token = localStorage.getItem('token');
+    return await axios.post(`${API_URL}/Problems`, problemData, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const getProblemById = async (id) => {
@@ -84,7 +117,12 @@ export const getProblemById = async (id) => {
 };
 
 export const updateProblem = async (id, problemData) => {
-    return await axios.put(`${API_URL}/Problems/${id}`, problemData);
+    const token = localStorage.getItem('token');
+    return await axios.put(`${API_URL}/Problems/${id}`, problemData, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const deleteProblem = async (id) => {
