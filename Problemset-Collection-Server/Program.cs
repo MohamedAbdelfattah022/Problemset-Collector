@@ -67,10 +67,6 @@ namespace Problemset_Collection_Server
             if (app.Environment.IsDevelopment()) {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-
-                Console.WriteLine($"Connection String: {builder.Configuration["constr"]}");
-                Console.WriteLine(smtpSettengs.Server);
-                Console.WriteLine(smtpSettengs.Sender);
             }
 
             app.UseHttpsRedirection();
