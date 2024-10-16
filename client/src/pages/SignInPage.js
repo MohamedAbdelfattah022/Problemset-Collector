@@ -12,15 +12,14 @@ const SignInPage = ({ onSignIn }) => {
         event.preventDefault();
 
         try {
-            // Call the loginUser function from api.js
             const response = await loginUser(email, password);
 
             if (response.status === 200) {
-                const token = response.data;  // Assuming the token is returned in the response body
-                localStorage.setItem('token', token);  // Store token in localStorage
+                const token = response.data;
+                localStorage.setItem('token', token);
 
-                onSignIn(true);  // Update the parent state
-                navigate('/admin');  // Redirect to admin page
+                onSignIn(true);
+                navigate('/admin');
             }
         } catch (error) {
             if (error.response && error.response.data) {

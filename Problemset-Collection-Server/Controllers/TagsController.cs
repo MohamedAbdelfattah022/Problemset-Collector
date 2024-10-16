@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Problemset_Collection_Server.Data;
-using System.ComponentModel.DataAnnotations;
 
 namespace Problemset_Collection_Server.Controllers
 {
@@ -38,7 +38,8 @@ namespace Problemset_Collection_Server.Controllers
         }
 
         [HttpPost("{tagName}")]
-        public ActionResult<Tag> AddTag([FromRoute, Required] string tagName) {
+        [Authorize]
+        public ActionResult<Tag> AddTag(string tagName) {
             if (string.IsNullOrWhiteSpace(tagName))
                 return BadRequest("Tag name cannot be empty or whitespace.");
 
@@ -55,6 +56,7 @@ namespace Problemset_Collection_Server.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize]
         public ActionResult<Tag> UpdateTag(int id, [FromBody] Tag tag) {
             if (id <= 0) return BadRequest("Id must be a positive integer.");
 
@@ -77,6 +79,7 @@ namespace Problemset_Collection_Server.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize]
         public ActionResult DeleteTag(int id) {
             if (id <= 0) return BadRequest("Id must be a positive integer.");
 

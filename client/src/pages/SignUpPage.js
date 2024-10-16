@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { inviteAdmin } from '../api'; // Assume inviteAdmin is the function that sends the invite
+import axios from 'axios';
+import { inviteAdmin } from "../api"
 
 const SignUpPage = () => {
     const [email, setEmail] = useState('');
@@ -9,14 +10,12 @@ const SignUpPage = () => {
     const handleInviteAdmin = async (e) => {
         e.preventDefault();
 
-        // Basic validation
         if (!email) {
             setError('Please enter an email.');
             return;
         }
 
         try {
-            // Call the inviteAdmin function from api.js
             const response = await inviteAdmin(email);
 
             if (response.status === 200) {

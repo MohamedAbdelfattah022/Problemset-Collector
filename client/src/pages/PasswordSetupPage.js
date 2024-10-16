@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { registerUser } from "../api"
 
 const PasswordSetupPage = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [searchParams] = useSearchParams();
+    const token = decodeURIComponent(searchParams.get('token'));
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Basic validation
         if (!password || !confirmPassword) {
             setError('Please fill in both fields.');
             return;
@@ -21,30 +23,23 @@ const PasswordSetupPage = () => {
             return;
         }
 
-        // Here, you would typically send the new password to your backend for processing
-        // Simulating an API call to save the password
         try {
-            // Mock API call
-            mockApiCall(password);
-            setSuccess('Your password has been set successfully! You can now log in.');
-            setError('');
-            // Redirect after a delay (if desired)
-            setTimeout(() => {
-                navigate('/signin'); // Redirect to sign-in page
-            }, 3000);
+            const formData = {
+                password,
+                token,
+            };
+            const response = await registerUser(formData);
+
+            if (response.status === 200) {
+                setSuccess('Your password has been set successfully! You can now log in.');
+                setError('');
+                setTimeout(() => {
+                    navigate('/signin');
+                }, 3000);
+            }
         } catch (error) {
             setError('Failed to set your password. Please try again later.');
         }
-    };
-
-    // Simulate an API call
-    const mockApiCall = (password) => {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                // Simulate success
-                resolve(password);
-            }, 1000); // Simulate network delay
-        });
     };
 
     return (

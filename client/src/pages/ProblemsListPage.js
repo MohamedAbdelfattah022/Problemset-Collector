@@ -8,7 +8,7 @@ import { HiOutlineX } from 'react-icons/hi';
 const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
     const pageSize = 10;
     const tagPagination = 6;
-    const difficultiesPagination = 5; // Number of difficulties to show initially
+    const difficultiesPagination = 5;
 
     const [problems, setProblems] = useState([]);
     const [filteredProblems, setFilteredProblems] = useState([]);
@@ -19,7 +19,7 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [visibleTagsCount, setVisibleTagsCount] = useState(tagPagination);
-    const [visibleDifficultiesCount, setVisibleDifficultiesCount] = useState(difficultiesPagination); // For difficulties
+    const [visibleDifficultiesCount, setVisibleDifficultiesCount] = useState(difficultiesPagination);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
     const observer = useRef();
@@ -180,8 +180,8 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
     };
 
     return (
-        <div>
-            <main className="p-4">
+        <div className="p-4 mt-7 bg-gray-50 min-h-screen">
+            <main className="max-w-7xl mx-auto bg-white rounded-lg shadow-md p-6">
                 <div className="mb-4">
                     {(selectedTags.length > 0 || selectedDifficulties.length > 0 || category || searchTerm) && (
                         <button
@@ -194,17 +194,18 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
                         </button>
                     )}
                 </div>
+
                 <SearchBar searchTerm={searchTerm} onSearchChange={handleSearchChange} onSearchClick={handleSearchClick} />
-                
+
                 {/* Difficulties Section */}
                 <div className="mb-4">
-                    <h2 className="text-xl font-semibold">Difficulties</h2>
+                    <h2 className="text-xl font-semibold text-gray-800">Difficulties</h2>
                     <div className="flex flex-wrap gap-2 mt-4">
                         {extractUniqueDifficulties().slice(0, visibleDifficultiesCount).map((difficulty) => (
                             <button
                                 key={difficulty}
                                 onClick={() => handleDifficultyClick(difficulty)}
-                                className={`px-4 py-2 rounded-lg text-white ${selectedDifficulties.includes(difficulty) ? 'bg-blue-500' : 'bg-gray-300'}`}
+                                className={`px-4 py-2 rounded-lg text-white ${selectedDifficulties.includes(difficulty) ? 'bg-blue-600' : 'bg-gray-300'}`}
                             >
                                 {difficulty}
                             </button>
@@ -230,33 +231,56 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
 
                 {/* Tags Section */}
                 <div className="mb-4">
-                    <h2 className="text-xl font-semibold">Tags</h2>
+                    <h2 className="text-xl font-semibold text-gray-800">Tags</h2>
                     <div className="flex flex-wrap gap-2 mt-4">
                         {extractUniqueTags().slice(0, visibleTagsCount).map((tag) => (
                             <button
                                 key={tag}
                                 onClick={() => handleTagClick(tag)}
-                                className={`px-4 py-2 rounded-lg text-white ${selectedTags.includes(tag) ? 'bg-blue-500' : 'bg-gray-300'} mb-2`}
+                                className={`px-4 py-2 rounded-lg text-white ${selectedTags.includes(tag) ? 'bg-blue-600' : 'bg-gray-300'}`}
                             >
                                 {tag}
                             </button>
                         ))}
                     </div>
                     {visibleTagsCount < extractUniqueTags().length && (
-                        <button onClick={() => setVisibleTagsCount(extractUniqueTags().length)} className="text-blue-500 hover:underline">Show More</button>
+                        <button
+                            onClick={() => setVisibleTagsCount(extractUniqueTags().length)}
+                            className="text-blue-500 hover:underline mt-2"
+                        >
+                            Show More
+                        </button>
                     )}
                     {visibleTagsCount > tagPagination && (
-                        <button onClick={() => setVisibleTagsCount(tagPagination)} className="text-blue-500 hover:underline">Show Less</button>
+                        <button
+                            onClick={() => setVisibleTagsCount(tagPagination)}
+                            className="text-blue-500 hover:underline mt-2"
+                        >
+                            Show Less
+                        </button>
                     )}
                 </div>
 
-                {/* Problem Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {filteredProblems.map((problem, index) => {
-                        const isLastProblem = filteredProblems.length === index + 1;
-                        return (
-                            <div ref={isLastProblem ? lastProblemElementRef : null} key={problem.problemId}>
+                {/* Problems List Section */}
+                <div className="flex flex-col space-y-4">
+                    {loading ? (
+                        <div className="flex items-center justify-center py-4 bg-gray-100">
+                            <div className="text-center">
+                                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                                <h2 className="text-xl font-semibold mt-4 text-gray-700">Loading</h2>
+                                <p className="text-gray-500 mt-2">Please wait while we fetch the data...</p>
+                            </div>
+                        </div>
+                    ) : error ? (
+                        <div className="text-center text-red-500">{error}</div>
+                    ) : (
+                        filteredProblems.map((problem, index) => (
+                            <div
+                                key={`${problem._id}-${index}`}
+                                ref={index === filteredProblems.length - 1 ? lastProblemElementRef : null}
+                            >
                                 <ProblemCard
+                                    key={problem._id}
                                     problem={problem}
                                     onEdit={openEditModal}
                                     onDeleteProblem={onDeleteProblem}
@@ -266,12 +290,20 @@ const ProblemsListPage = ({ openEditModal, onDeleteProblem, isAdmin }) => {
                                     onDelete={() => onDeleteProblem(problem.problemId)}
                                 />
                             </div>
-                        );
-                    })}
+                        ))
+                    )}
                 </div>
 
-                {loading && <p className="text-center mt-4">Loading...</p>}
-                {error && <p className="text-center mt-4 text-red-500">{error}</p>}
+                {hasMore && !loading && (
+                    <div className="mt-4 text-center">
+                        <button
+                            onClick={() => setPage(page + 1)}
+                            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                )}
             </main>
         </div>
     );
