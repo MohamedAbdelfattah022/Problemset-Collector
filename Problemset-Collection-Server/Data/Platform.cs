@@ -9,5 +9,6 @@ namespace Problemset_Collection_Server.Data
         public string PlatformName { get; set; }
         [Required]
         public string PlatformUrl { get; set; }
+        //public byte[] PlatformLogo { get; set; }
     }
 }

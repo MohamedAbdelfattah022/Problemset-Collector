@@ -9,6 +9,8 @@ import Footer from './components/Footer';
 import About from './pages/About';
 import SignIn from './pages/SignInPage';
 import SignUp from './pages/SignUpPage';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import PasswordSetupPage from './pages/PasswordSetupPage';
 import TagsManagement from './components/TagsManagement';
 import PlatformsManagement from './components/PlatformsManagement';
@@ -110,6 +112,8 @@ function App() {
             </Route>
             <Route path="/add-admin" element={isAuthenticated ? <SignUp /> : <SignIn onSignIn={setIsAuthenticated} />} />
             <Route path="/setup-password" element={<PasswordSetupPage />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
         </div>
 

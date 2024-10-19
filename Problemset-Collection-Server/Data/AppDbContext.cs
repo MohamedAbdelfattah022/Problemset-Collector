@@ -10,7 +10,7 @@ namespace Problemset_Collection_Server.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ProblemTag> ProblemTags { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<AdminInvitation> AdminInvitations { get; set; }
+        public DbSet<UserRequest> UserRequests { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             base.OnConfiguring(optionsBuilder);
             DotEnv.Load();
