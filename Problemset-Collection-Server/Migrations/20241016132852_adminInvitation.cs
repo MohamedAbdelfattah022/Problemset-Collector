@@ -12,7 +12,7 @@ namespace Problemset_Collection_Server.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AdminInvitations",
+                name: "UserRequests",
                 columns: table => new
                 {
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -21,7 +21,7 @@ namespace Problemset_Collection_Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AdminInvitations", x => x.Email);
+                    table.PrimaryKey("PK_UserRequests", x => x.Email);
                 });
         }
 
@@ -29,7 +29,7 @@ namespace Problemset_Collection_Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AdminInvitations");
+                name: "UserRequests");
         }
     }
 }

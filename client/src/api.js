@@ -22,6 +22,13 @@ export const loginUser = async (email, password) => {
     return response;
 };
 
+export const forgotPassword = async (data) => {
+    return await axios.post(`${API_URL}/Users/forgotPass`, data);
+};
+
+export const resetPassword = async (formData) => {
+    return await axios.put(`${API_URL}/Users/resetPass`, formData);
+};
 
 // Tags API
 export const getTags = async () => {

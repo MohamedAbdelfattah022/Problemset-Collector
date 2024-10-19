@@ -39,7 +39,7 @@ namespace Problemset_Collection_Server.Migrations
 
                     b.HasKey("Email");
 
-                    b.ToTable("AdminInvitations");
+                    b.ToTable("UserRequests");
                 });
 
             modelBuilder.Entity("Problemset_Collection_Server.Data.Platform", b =>

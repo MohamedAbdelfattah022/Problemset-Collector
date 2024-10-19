@@ -16,7 +16,10 @@ const SignUpPage = () => {
         }
 
         try {
-            const response = await inviteAdmin(email);
+            const request = {
+                email: email,
+            };
+            const response = await inviteAdmin(request);
 
             if (response.status === 200) {
                 setError('');

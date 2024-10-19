@@ -2,7 +2,7 @@
 
 namespace Problemset_Collection_Server.Data
 {
-    public class AdminInvitation
+    public class UserRequest
     {
 
         [Key]
